@@ -1,11 +1,14 @@
 <?php
 namespace States;
 
+use Exception;
+
 class StateMachine implements StateMachineInterface
 {
     protected $states = [];
     protected $transitions = [];
     protected $object = null;
+    protected $field = 'state';
 
     /**
      * StateMachine constructor.
@@ -16,20 +19,32 @@ class StateMachine implements StateMachineInterface
 
     }
 
-    public function setState($state)
+    /**
+     * @param $state
+     * @return StateMachine
+     */
+    public function setState($state) : StateMachine
     {
         if (isset($this->states[$state])) {
-            throw new \Exception('State already registered: '.$state);
+            return null;
         }
 
         $this->states[$state] = $state;
+
+        return $this;
     }
 
 
     public function setTransition(string $transitionName, $from, $to)
     {
         if (!(gettype($from) == 'string' || gettype($from) == 'array')) {
-            throw new \Exception('From or To arguments mus be string or array');
+            return null;
+            //throw new Exception('From or To arguments mus be string or array');
+        }
+
+        if (!(gettype($to) == 'string' || gettype($to) == 'array')) {
+            return null;
+            //throw new Exception('From or To arguments mus be string or array');
         }
 
         if (gettype($from) == 'string') {
@@ -41,18 +56,21 @@ class StateMachine implements StateMachineInterface
         }
 
         if (isset($this->transition[$transitionName])) {
-            throw new \Exception('Transition already registered: '.$transitionName);
+            return null;
+            //throw new \Exception('Transition already registered: '.$transitionName);
         }
 
         foreach ($from as $item) {
             if (!isset($this->states[$item])) {
-                throw new \Exception('The state '. $item . ' is not registered.');
+                return 'The state '. $item . ' is not registered.';
+                // new \Exception('The state '. $item . ' is not registered.');
             }
         }
 
         foreach ($to as $item) {
             if (!isset($this->states[$item])) {
-                throw new \Exception('The state '. $item . ' is not registered.');
+                return 'The state '. $item . ' is not registered.';
+                //throw new \Exception('The state '. $item . ' is not registered.');
             }
         }
 
@@ -60,6 +78,8 @@ class StateMachine implements StateMachineInterface
             "from" => $from,
             "to" => $to
         ];
+
+        return $this;
     }
 
 
@@ -82,13 +102,21 @@ class StateMachine implements StateMachineInterface
     public function can($transition)
     {
         if (!isset($this->transitions[$transition])) {
-            throw new \Exception('The transition '.$transition.' is not registered.');
+            return false;
+            //throw new \Exception('The transition '.$transition.' is not registered.');
         }
+
         if ($this->object !== null) {
             $object = $this->object;
         }
 
-        if (!in_array($object->state, $this->transitions[$transition]['from'], true)) {
+        $state = $this->object->{$this->field} ?? false;
+
+        if (!$state) {
+            return false;
+        }
+
+        if (!in_array($state, $this->transitions[$transition]['from'], true)) {
             return false;
         }
 
@@ -102,4 +130,22 @@ class StateMachine implements StateMachineInterface
     {
         $this->object = $object;
     }
+
+    /**
+     * @return string
+     */
+    public function getField(): string
+    {
+        return $this->field;
+    }
+
+    /**
+     * @param string $field
+     */
+    public function setField(string $field): void
+    {
+        $this->field = $field;
+    }
+
+
 }

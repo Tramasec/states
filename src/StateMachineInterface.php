@@ -11,5 +11,5 @@ interface StateMachineInterface
      * @param $to
      * @return mixed
      */
-    public function setTransition(string $transition, $from, $to): void;
+    public function setTransition(string $transition, $from, $to);
 }
