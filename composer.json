@@ -1,0 +1,15 @@
+{
+    "name": "tramasec/states",
+    "authors": [
+        {
+            "name": "Victor Sandoval",
+            "email": "vichito00@gmail.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "States\\": "src/"
+        }
+    }
+}
